@@ -4,6 +4,7 @@ from typing import List, Optional
 import logging
 
 from app.core.database import get_db
+from app.core.exceptions import ClashRoyaleAPIError
 from app.services.clash_royale_service import ClashRoyaleService
 from app.models.player import Player, PlayerStats
 from app.schemas.player import PlayerResponse, PlayerStatsResponse
@@ -43,6 +44,10 @@ async def get_player(
             player = await clash_service.update_player_in_db(db, player_data)
         
         return PlayerResponse.from_orm(player)
+
+    except ClashRoyaleAPIError as e:
+        logger.error(f"Clash Royale API error getting player {player_tag}: {e}")
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to Clash Royale API.")
         
     except Exception as e:
         logger.error(f"Error getting player {player_tag}: {e}")
@@ -65,6 +70,10 @@ async def get_player_stats(
                 raise HTTPException(status_code=404, detail="Player stats not available")
         
         return PlayerStatsResponse.from_orm(stats)
+
+    except ClashRoyaleAPIError as e:
+        logger.error(f"Clash Royale API error getting player stats {player_tag}: {e}")
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to Clash Royale API.")
         
     except Exception as e:
         logger.error(f"Error getting player stats {player_tag}: {e}")
@@ -88,6 +97,10 @@ async def get_player_battles(
             "battles": battles,
             "count": len(battles)
         }
+
+    except ClashRoyaleAPIError as e:
+        logger.error(f"Clash Royale API error getting player battles {player_tag}: {e}")
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to Clash Royale API.")
         
     except Exception as e:
         logger.error(f"Error getting player battles {player_tag}: {e}")
@@ -107,6 +120,10 @@ async def get_upcoming_chests(
             "player_tag": clean_tag,
             "upcoming_chests": chests
         }
+
+    except ClashRoyaleAPIError as e:
+        logger.error(f"Clash Royale API error getting upcoming chests {player_tag}: {e}")
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to Clash Royale API.")
         
     except Exception as e:
         logger.error(f"Error getting upcoming chests {player_tag}: {e}")
@@ -141,6 +158,10 @@ async def refresh_player_data(
             "player_tag": clean_tag,
             "updated_at": player.updated_at.isoformat() if player.updated_at else None
         }
+
+    except ClashRoyaleAPIError as e:
+        logger.error(f"Clash Royale API error refreshing player data {player_tag}: {e}")
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to Clash Royale API.")
         
     except Exception as e:
         logger.error(f"Error refreshing player data {player_tag}: {e}")
