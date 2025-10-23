@@ -8,6 +8,7 @@ import json
 
 from app.core.config import settings
 from app.core.database import get_redis
+from app.core.exceptions import ClashRoyaleAPIError
 from app.models.player import Player, PlayerStats, PlayerCard
 from app.models.battle import Battle, Card
 from app.models.clan import Clan
@@ -61,6 +62,9 @@ class ClashRoyaleService:
                         json.dumps(data)
                     )
                     return data
+                elif response.status_code == 403:
+                    logger.error("API request failed with status 403: Forbidden. This is likely due to an invalid or expired API key.")
+                    raise ClashRoyaleAPIError("Invalid or expired API key.")
                 elif response.status_code == 404:
                     logger.warning(f"Resource not found: {endpoint}")
                     return None
